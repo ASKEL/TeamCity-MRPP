@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="PHP - Generate phpDoc">
+  <description>Generate documentation - phpDoc</description>
+  <settings>
+    <parameters>
+      <param name="system.phpdoc.d" value="src" spec="text description='Provide a comma-separated list of source folders to parse' display='normal' label='-d|–directory[=”...”]' validationMode='not_empty'" />
+      <param name="system.phpdoc.templates" value="responsive" spec="text description='Name templates' display='normal' label='Templates' validationMode='any'" />
+    </parameters>
+    <build-runners>
+      <runner id="RUNNER_14" name="" type="Ant">
+        <parameters>
+          <param name="build-file"><![CDATA[<project name="Genetare phpDoc">
+
+<property name="phpdoc.dir.work" value="${teamcity.build.workingDir}" />
+<property name="phpdoc.zip" value="${teamcity.build.workingDir}/phpdoc.zip"/>
+<property name="phpdoc.dir.target" value="${teamcity.build.workingDir}/tcphpdoc"/>
+
+<target name="runGenerate" depends="getPhpDocumentorPhar,executePhpDocumentorPhar,collectArtifacts">
+  <echo>##teamcity[publishArtifacts '${phpdoc.zip}']</echo>
+</target>
+
+<target name="executePhpDocumentorPhar">
+  <exec executable="php" failonerror="true">
+    <arg line="-f &quot;${phpdoc.dir.work}/phpDocumentor.phar&quot; run -d ${phpdoc.d} -t ${phpdoc.dir.target} --template=&quot;${phpdoc.templates}&quot;"/>
+  </exec>
+</target>
+
+<target name="collectArtifacts">
+  <zip destfile="${phpdoc.zip}" basedir="${phpdoc.dir.target}" />  
+</target>
+
+<target name="getPhpDocumentorPhar" depends="createWorkDirPhpDocumentor">
+  <get src="http://phpdoc.org/phpDocumentor.phar" dest="${phpdoc.dir.work}" verbose="on" skipexisting="false"/>
+</target>
+
+<target name="createWorkDirPhpDocumentor">
+    <mkdir dir="${phpdoc.dir.work}"/>
+</target>
+
+</project>]]></param>
+          <param name="build-file-path" value="build.xml" />
+          <param name="target" value="runGenerate" />
+          <param name="teamcity.coverage.emma.include.source" value="true" />
+          <param name="teamcity.coverage.emma.instr.parameters" value="-ix -*Test*" />
+          <param name="teamcity.coverage.idea.includePatterns" value="*" />
+          <param name="teamcity.step.mode" value="default" />
+          <param name="use-custom-build-file" value="true" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+
